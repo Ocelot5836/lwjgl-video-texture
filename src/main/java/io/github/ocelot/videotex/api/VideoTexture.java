@@ -172,4 +172,18 @@ public abstract class VideoTexture implements NativeResource {
     public int getId() {
         return this.id;
     }
+
+    /**
+     * @return the width of the video in pixels
+     */
+    public int getWidth() {
+        return this.width;
+    }
+
+    /**
+     * @return the height of the video in pixels
+     */
+    public int getHeight() {
+        return this.height;
+    }
 }
