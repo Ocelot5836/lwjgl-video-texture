@@ -28,7 +28,6 @@ public abstract class VideoTexture implements NativeResource {
     private long startTime;
     private double fps;
     private int frame;
-    private boolean done;
 
     protected int id;
     protected int width;
@@ -80,8 +79,9 @@ public abstract class VideoTexture implements NativeResource {
                 Frame image = this.grabber.grabImage();
                 if (image != null) {
                     this.upload(image);
+                } else {
+                    this.stop();
                 }
-                this.done = image == null;
             } catch (FFmpegFrameGrabber.Exception e) {
                 LOGGER.error("Failed to grab frame, aborting!", e);
                 this.stop();
@@ -135,7 +135,6 @@ public abstract class VideoTexture implements NativeResource {
         this.startTime = 0;
         this.fps = 0;
         this.frame = 0;
-        this.done = false;
     }
 
     /**
@@ -173,7 +172,7 @@ public abstract class VideoTexture implements NativeResource {
      * @return Whether the video is done playing
      */
     public boolean isDone() {
-        return this.done;
+        return this.grabber == null;
     }
 
     /**

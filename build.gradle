@@ -2,6 +2,7 @@ import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id "java-library"
+    id "maven-publish"
     id "com.gradleup.shadow" version "9.0.0-beta10"
 }
 
@@ -91,8 +92,21 @@ tasks.shadowJar {
     configurations = [project.configurations.shade]
     minimize()
     exclude "org.slf4j:slf4j-api"
-    relocate "org.bytedeco.ffmpeg", 'io.github.ocelot.lib.bytedeco.ffmpeg'
-    relocate "org.bytedeco.javacpp", 'io.github.ocelot.lib.bytedeco.javacpp'
-    relocate "org.bytedeco.javacv", 'io.github.ocelot.lib.bytedeco.javacv'
+//    relocate "org.bytedeco.ffmpeg", 'io.github.ocelot.lib.bytedeco.ffmpeg'
+//    relocate "org.bytedeco.javacv", 'io.github.ocelot.lib.bytedeco.javacv'
     relocate "lib", 'io.github.ocelot.lib'
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifactId = base.archivesName.get()
+            from components.shadow
+        }
+    }
+    repositories {
+        maven {
+            url = System.getenv('local_maven_url')
+        }
+    }
 }
