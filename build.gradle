@@ -59,14 +59,14 @@ dependencies {
             "openblas",
             "opencv",
             "tesseract",
-            "videoinput",
+            "videoinput"
     ]
-    implementation("org.bytedeco:javacv-platform:1.5.10") {
+    shade(implementation("org.bytedeco:javacv-platform:1.5.10") {
         for (module in excludeModules) {
             exclude group: "org.bytedeco", module: module
             exclude group: "org.bytedeco", module: "$module-platform"
         }
-    }
+    })
 
     testImplementation platform("org.junit:junit-bom:5.10.0")
     testImplementation "org.junit.jupiter:junit-jupiter"
@@ -76,6 +76,23 @@ dependencies {
     testRuntimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
 }
 
-test {
-    useJUnitPlatform()
+jar {
+    archiveClassifier = "slim"
+    manifest {
+        attributes(
+                "FMLModType": "LIBRARY"
+        )
+    }
+}
+
+assemble.dependsOn shadowJar
+tasks.shadowJar {
+    archiveClassifier = ""
+    configurations = [project.configurations.shade]
+    minimize()
+    exclude "org.slf4j:slf4j-api"
+    relocate "org.bytedeco.ffmpeg", 'io.github.ocelot.lib.bytedeco.ffmpeg'
+    relocate "org.bytedeco.javacpp", 'io.github.ocelot.lib.bytedeco.javacpp'
+    relocate "org.bytedeco.javacv", 'io.github.ocelot.lib.bytedeco.javacv'
+    relocate "lib", 'io.github.ocelot.lib'
 }
