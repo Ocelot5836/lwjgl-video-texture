@@ -36,14 +36,14 @@ configurations {
 }
 
 dependencies {
-    api platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
-    api "org.slf4j:slf4j-api:2.0.12"
-    testRuntimeOnly "org.slf4j:slf4j-simple:2.0.12"
+    implementation "org.slf4j:slf4j-api:[2.0.0,)"
+    testRuntimeOnly "org.slf4j:slf4j-simple:[2.0.0,)"
 
     api "org.jetbrains:annotations:24.0.0"
-    api "org.lwjgl:lwjgl"
-    api "org.lwjgl:lwjgl-opengl"
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-opengl"
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 
@@ -61,7 +61,7 @@ dependencies {
             "tesseract",
             "videoinput",
     ]
-    api("org.bytedeco:javacv-platform:1.5.10") {
+    implementation("org.bytedeco:javacv-platform:1.5.10") {
         for (module in excludeModules) {
             exclude group: "org.bytedeco", module: module
             exclude group: "org.bytedeco", module: "$module-platform"
