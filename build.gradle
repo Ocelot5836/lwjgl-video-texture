@@ -1,0 +1,97 @@
+import org.gradle.internal.os.OperatingSystem
+
+plugins {
+    id "java"
+    id "com.gradleup.shadow" version "9.0.0-beta10"
+}
+
+group = "io.github.ocelot"
+version = "1.0.0"
+
+switch (OperatingSystem.current()) {
+    case OperatingSystem.LINUX:
+        project.ext.lwjglNatives = "natives-linux"
+        break
+    case OperatingSystem.MAC_OS:
+        project.ext.lwjglNatives = System.getProperty('os.arch').startsWith("aarch64") ? "natives-macos-arm64" : "natives-macos"
+        break
+    case OperatingSystem.WINDOWS:
+        project.ext.lwjglNatives = "natives-windows"
+        break
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+}
+
+configurations {
+    shade
+    implementation.extendsFrom shade
+}
+
+dependencies {
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+    implementation "ch.qos.logback:logback-core:1.5.1"
+    implementation "ch.qos.logback:logback-classic:1.5.1"
+
+    implementation "org.jetbrains:annotations:24.0.0"
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-opengl"
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+
+    def excludeModules = [
+            "artoolkitplus",
+            "flycapture",
+            "leptonica",
+            "libdc1394",
+            "libfreenect",
+            "libfreenect2",
+            "librealsense",
+            "librealsense2",
+            "openblas",
+            "opencv",
+            "tesseract",
+            "videoinput",
+    ]
+    shade(implementation("org.bytedeco:javacv-platform:1.5.10") {
+        for (module in excludeModules) {
+            exclude group: "org.bytedeco", module: module
+            exclude group: "org.bytedeco", module: "$module-platform"
+        }
+    })
+
+    testImplementation platform("org.junit:junit-bom:5.10.0")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "com.github.Ocelot5836:glfw-windows:57f0f87"
+
+    testImplementation "org.lwjgl:lwjgl-glfw"
+    testRuntimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    archiveClassifier = "slim"
+}
+
+assemble.dependsOn shadowJar
+tasks.shadowJar {
+    archiveClassifier = ""
+    configurations = [project.configurations.shade]
+    minimize()
+    exclude "org.slf4j:slf4j-api:1.7.5"
+    relocate "org.bytedeco.ffmpeg", 'io.github.ocelot.lib.javacv'
+    relocate "org.bytedeco.javacpp", 'io.github.ocelot.lib.javacv'
+    relocate "org.bytedeco.javacv", 'io.github.ocelot.lib.javacv'
+    relocate "lib", 'io.github.ocelot.lib'
+}
