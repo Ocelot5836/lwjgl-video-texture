@@ -79,7 +79,7 @@ public class WindowTest {
                     public void keyPressed(Window window, int key, int scanCode, KeyMods mods) {
                         if (key == GLFW_KEY_R) {
                             try {
-                                texture.play(new ByteArrayInputStream(data), mods.control() ? 4 : 1);
+                                texture.play(new ByteArrayInputStream(data), mods.control() ? 8 : 1);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -96,6 +96,10 @@ public class WindowTest {
 
                     texture.update();
                     glBindTexture(GL_TEXTURE_2D, texture.getId());
+
+                    if (texture.isDone()) {
+                        texture.play(new ByteArrayInputStream(data), 2.0);
+                    }
 
                     glDrawArrays(GL_TRIANGLES, 0, 3);
                 }

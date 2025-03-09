@@ -28,6 +28,7 @@ public abstract class VideoTexture implements NativeResource {
     private long startTime;
     private double fps;
     private int frame;
+    private boolean done;
 
     protected int id;
     protected int width;
@@ -80,6 +81,7 @@ public abstract class VideoTexture implements NativeResource {
                 if (image != null) {
                     this.upload(image);
                 }
+                this.done = image == null;
             } catch (FFmpegFrameGrabber.Exception e) {
                 LOGGER.error("Failed to grab frame, aborting!", e);
                 this.stop();
@@ -133,6 +135,7 @@ public abstract class VideoTexture implements NativeResource {
         this.startTime = 0;
         this.fps = 0;
         this.frame = 0;
+        this.done = false;
     }
 
     /**
@@ -167,9 +170,37 @@ public abstract class VideoTexture implements NativeResource {
     }
 
     /**
+     * @return Whether the video is done playing
+     */
+    public boolean isDone() {
+        return this.done;
+    }
+
+    /**
      * @return The OpenGL texture id
      */
     public int getId() {
         return this.id;
+    }
+
+    /**
+     * @return The width of the video. Only valid after the video starts playing
+     */
+    public int getWidth() {
+        return this.width;
+    }
+
+    /**
+     * @return The height of the video. Only valid after the video starts playing
+     */
+    public int getHeight() {
+        return this.height;
+    }
+
+    /**
+     * @return The framerate of the video. Only valid after the video starts playing
+     */
+    public double getFps() {
+        return this.fps;
     }
 }
