@@ -1,7 +1,7 @@
 import org.gradle.internal.os.OperatingSystem
 
 plugins {
-    id "java"
+    id "java-library"
     id "com.gradleup.shadow" version "9.0.0-beta10"
 }
 
@@ -36,14 +36,14 @@ configurations {
 }
 
 dependencies {
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+    api platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
-    implementation "org.slf4j:slf4j-api:2.0.12"
+    api "org.slf4j:slf4j-api:2.0.12"
     testRuntimeOnly "org.slf4j:slf4j-simple:2.0.12"
 
-    implementation "org.jetbrains:annotations:24.0.0"
-    implementation "org.lwjgl:lwjgl"
-    implementation "org.lwjgl:lwjgl-opengl"
+    api "org.jetbrains:annotations:24.0.0"
+    api "org.lwjgl:lwjgl"
+    api "org.lwjgl:lwjgl-opengl"
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 
@@ -61,12 +61,12 @@ dependencies {
             "tesseract",
             "videoinput",
     ]
-    shade(implementation("org.bytedeco:javacv-platform:1.5.10") {
+    api("org.bytedeco:javacv-platform:1.5.10") {
         for (module in excludeModules) {
             exclude group: "org.bytedeco", module: module
             exclude group: "org.bytedeco", module: "$module-platform"
         }
-    })
+    }
 
     testImplementation platform("org.junit:junit-bom:5.10.0")
     testImplementation "org.junit.jupiter:junit-jupiter"
@@ -78,20 +78,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-jar {
-    archiveClassifier = "slim"
-}
-
-assemble.dependsOn shadowJar
-tasks.shadowJar {
-    archiveClassifier = ""
-    configurations = [project.configurations.shade]
-    minimize()
-    exclude "org.slf4j:slf4j-api:1.7.5"
-    relocate "org.bytedeco.ffmpeg", 'io.github.ocelot.lib.javacv'
-    relocate "org.bytedeco.javacpp", 'io.github.ocelot.lib.javacv'
-    relocate "org.bytedeco.javacv", 'io.github.ocelot.lib.javacv'
-    relocate "lib", 'io.github.ocelot.lib'
 }
