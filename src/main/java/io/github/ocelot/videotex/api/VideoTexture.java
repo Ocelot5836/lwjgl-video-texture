@@ -104,7 +104,6 @@ public abstract class VideoTexture implements NativeResource {
                         case DEPTH_DOUBLE -> GL_DOUBLE;
                         default -> throw new IllegalStateException("Unexpected value: " + frame.imageDepth);
                     };
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
                     glPixelStorei(GL_UNPACK_ROW_LENGTH, frame.imageStride / frame.imageChannels);
                     this.upload(this.width, this.height, frame.imageChannels == 4 ? GL_BGRA : GL_BGR, dataType, address);
                 } else {
