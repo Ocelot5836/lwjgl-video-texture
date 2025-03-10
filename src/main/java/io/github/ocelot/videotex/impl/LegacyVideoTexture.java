@@ -51,6 +51,6 @@ public class LegacyVideoTexture extends VideoTexture {
             default -> throw new IllegalStateException("Unexpected value: " + frame.imageDepth);
         };
         glPixelStorei(GL_UNPACK_ROW_LENGTH, (int) indexer.stride(0) / 3);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this.width, this.height, GL_BGR, format, address + frame.imageStride);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this.width, this.height, GL_BGR, format, address);
     }
 }

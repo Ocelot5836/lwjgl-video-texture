@@ -33,7 +33,7 @@ public class WindowTest {
 
             try (VideoTexture texture = VideoTexture.create()) {
                 byte[] data;
-                try (InputStream stream = WindowTest.class.getResourceAsStream("/test.mp4")) {
+                try (InputStream stream = WindowTest.class.getResourceAsStream("/recording.mov")) {
                     data = stream.readAllBytes();
                 }
 
