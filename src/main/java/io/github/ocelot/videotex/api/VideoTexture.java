@@ -7,6 +7,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.lwjgl.opengl.GL11C.glDeleteTextures;
+import static org.bytedeco.javacv.Frame.*;
+import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL12C.GL_BGR;
+import static org.lwjgl.opengl.GL12C.GL_BGRA;
 
 /**
  * @author Ocelot
@@ -76,9 +80,32 @@ public abstract class VideoTexture implements NativeResource {
         if (this.frame < expectedFrame) {
             this.frame = expectedFrame;
             try {
-                Frame image = this.grabber.grabImage();
-                if (image != null) {
-                    this.upload(image);
+                Frame frame = this.grabber.grabImage();
+                if (frame != null) {
+                    if (frame.type != Frame.Type.VIDEO) {
+                        return;
+                    }
+
+                    if (frame.imageWidth != this.width || frame.imageHeight != this.height) {
+                        glDeleteTextures(this.id);
+                        this.id = 0;
+                    }
+                    this.width = frame.imageWidth;
+                    this.height = frame.imageHeight;
+
+                    long address = MemoryUtil.memAddress(frame.image[0]);
+                    int dataType = switch (frame.imageDepth) {
+                        case DEPTH_BYTE -> GL_BYTE;
+                        case DEPTH_UBYTE -> GL_UNSIGNED_BYTE;
+                        case DEPTH_SHORT -> GL_SHORT;
+                        case DEPTH_USHORT -> GL_UNSIGNED_SHORT;
+                        case DEPTH_INT -> GL_INT;
+                        case DEPTH_FLOAT -> GL_FLOAT;
+                        case DEPTH_DOUBLE -> GL_DOUBLE;
+                        default -> throw new IllegalStateException("Unexpected value: " + frame.imageDepth);
+                    };
+                    glPixelStorei(GL_UNPACK_ROW_LENGTH, frame.imageStride / frame.imageChannels);
+                    this.upload(this.width, this.height, frame.imageChannels == 4 ? GL_BGRA : GL_BGR, dataType, address);
                 } else {
                     this.stop();
                 }
@@ -90,7 +117,7 @@ public abstract class VideoTexture implements NativeResource {
     }
 
     @ApiStatus.OverrideOnly
-    protected abstract void upload(Frame frame);
+    protected abstract void upload(int width, int height, int format, int dataType, long address);
 
     /**
      * Stops the current video playback and starts playing the specified video data.
